@@ -50,7 +50,7 @@
 				font-family: "Yanone Kaffeesatz", sans-serif;	
 				display: flex
 			}
-			.game-image p {
+			.game-name {
 				display: flex;
 				justify-content: center;
 				margin: 0 .25em;
@@ -107,6 +107,7 @@
 				align-items: center;
 			}
 			.hide { display: none; }
+			.no-margin { margin: 0; }
 			
 		</style>
 	</head>
@@ -172,6 +173,9 @@
 							progressBar.classList.add("hide");
 						}
 						else {
+							if (progressBar.classList.contains("hide")) {
+								progressBar.classList.remove("hide");
+							}
 							function getAchieved() {			
 								for (var i = 0; i < jsonObj.playerstats.achievements.length; i++) {								
 									if (jsonObj.playerstats.achievements[i].achieved == 1){
@@ -200,11 +204,11 @@
 						var jsonObj = JSON.parse(xhttp.responseText);						
 						for (var j = 0; j < jsonObj.response.games.length; j++) {							
 							if(jsonObj.response.games[j].appid == appid) {								
-								gameImage.innerHTML = "<img src=" + "http://media.steampowered.com/steamcommunity/public/images/apps/" + appid + "/" + jsonObj.response.games[j].img_logo_url + ".jpg>" + "<p>Current Game: " + jsonObj.response.games[j].name + "</p>";
+								gameImage.innerHTML = "<img src=" + "http://media.steampowered.com/steamcommunity/public/images/apps/" + appid + "/" + jsonObj.response.games[j].img_logo_url + ".jpg>" + "<p class='game-name'> Current Game: " + jsonObj.response.games[j].name + "</p>";
 								break;
 							}
 							else {
-								gameImage.innerHTML = "<p>Not playing a Steam game</p>";
+								gameImage.innerHTML = "<p class='game-name no-margin'>Not playing a Steam game</p>";
 							}
 						}
 					}
