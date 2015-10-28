@@ -1,0 +1,8 @@
+{
+	"name": "layout-test",
+	"version": "0.0.1",
+	"dependencies": {
+		"express": "^4.11.2",
+		"longjohn" : "0.2.9"
+	}
+}

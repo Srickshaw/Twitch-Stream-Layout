@@ -1,0 +1,218 @@
+<html>
+	<head>
+		<link href='https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,300' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+		<style>
+			* { 
+			  box-sizing: border-box;
+			}
+			body {
+			  margin: 0;
+			  padding: 0;
+			}
+			.half-width { 
+				width: 48%;
+				margin-left: 4%;
+			}
+			.half-width:first-child {
+				margin-left: 0%;
+			}
+			.layout-wrapper {
+				width: 1440px;
+				height: 900px;				
+				display: relative;
+				background: linear-gradient(135deg, rgba(30,87,153,0) 0%,rgba(30,87,153,0.8) 15%,rgba(30,87,153,1) 19%,rgba(30,87,153,1) 20%,rgba(41,137,216,1) 50%,rgba(30,87,153,1) 80%,rgba(30,87,153,1) 81%,rgba(30,87,153,0.8) 85%,rgba(30,87,153,0) 100%);;
+			}
+			.content-wrapper {
+				width: 1280px;
+				display: flex;
+				justify-content: flex-end;
+				flex-flow: column;
+				margin: 0 auto;
+			}
+			.game-window {
+				background: gray;
+				height: 720px;
+				width: 1280px;			
+			}
+			.game-info {
+				height: 90px;
+				width: 100%;
+				background: black;
+				display: flex;
+				flex-flow: column;
+				justify-content: center;
+				border-bottom: 1px solid #ccc;
+			}
+			.game-image {
+				padding-left: 2em;
+				color: white;
+				font-family: "Yanone Kaffeesatz", sans-serif;	
+				display: flex
+			}
+			.game-image p {
+				display: flex;
+				justify-content: center;
+				margin: 0 .25em;
+				flex-flow: column;
+				font-size: 2.5em;
+				font-weight: 300;				
+			}
+			.progress-holder {
+				width: 100%;
+				background: black;
+				height: 90px;
+				display: flex;
+				flex-flow: row;
+				flex-wrap: wrap;
+				justify-content: center;
+			}
+			.row {
+				width: 95%;
+				display: flex;
+				flex-flow: row;				
+			}
+			.achieve-text {
+				display: flex;
+				align-items: center;
+			}
+			.achieve-text p, .powered-by p {
+				color: white;
+				margin: 0;
+				font-family: "Yanone Kaffeesatz", sans-serif;
+				font-weight: 300;
+				font-size: 1.25em;
+			}			
+			.progress-bar {
+				width: 100%;
+				background: gray;
+				border-radius: 8px;
+				height: 1em;
+				position: relative;
+			}
+			
+			.progress-bar-overlay {
+				background-color: green;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;				
+				position: absolute;
+				content: ' ';
+				border-radius: 8px;
+			}
+			.powered-by {
+				display: flex;
+				justify-content: flex-end;
+				align-items: center;
+			}
+			.hide { display: none; }
+			
+		</style>
+	</head>
+	<body>
+		<div class="layout-wrapper">
+			<div class="content-wrapper">
+				<div class="game-window"></div>
+				<div class="game-info">
+					<div id="game-image" class="game-image"></div>
+				</div>
+				<div class="progress-holder">
+					<div class="row">
+						<div class="achieve-text half-width">
+							<p></p>
+						</div>	
+						<div class="powered-by half-width">
+							<p>Powered by &nbsp;<i class="fa fa-steam"></i>&nbsp; Steam</p>
+						</div>
+					</div>	
+					<div class="row">
+						<div class="progress-bar">
+							<div class="progress-bar-overlay"></div>
+						</div>	
+					</div>
+				</div>
+			</div>	
+		</div>		
+	</body>
+	
+	<script>
+		var progressBar = document.querySelector(".progress-bar");
+		var progressBarInner = document.querySelector(".progress-bar-overlay");
+		var achieveText = document.querySelector(".achieve-text > p");
+		var gameImage = document.querySelector("#game-image");
+		var achieved = 0;
+		var achieveTotal = 0;
+		var percentAchieved;
+		var gameID;
+		
+		function getAppID() {
+				var xhttp = new XMLHttpRequest();
+					xhttp.onreadystatechange = function() {
+						if (xhttp.readyState == 4 && xhttp.status == 200) {
+							var jsonObj = JSON.parse(xhttp.responseText);								
+							gameID = jsonObj.response.players[0].gameid;													
+							getAchievements(gameID);
+							getGameImage(gameID);
+						}				
+				}
+				xhttp.open("GET", "http://localhost:3000/userinfo", true);
+				xhttp.send();
+			};
+		
+		
+		
+		function getAchievements(appID) {			
+			var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (xhttp.readyState == 4 && xhttp.status == 200) {
+						var jsonObj = JSON.parse(xhttp.responseText);						
+						if(jsonObj.playerstats.success == false) {
+							achieveText.innerHTML = "There are no achievements for this game";
+							progressBar.classList.add("hide");
+						}
+						else {
+							function getAchieved() {			
+								for (var i = 0; i < jsonObj.playerstats.achievements.length; i++) {								
+									if (jsonObj.playerstats.achievements[i].achieved == 1){
+										achieved++;
+									}
+								}
+								return achieved;
+							}							
+							achieveTotal = jsonObj.playerstats.achievements.length;
+							achieved = 0;
+							percentAchieved = Math.floor((getAchieved() / achieveTotal) * 100);	
+							achieved = 0;
+							achieveText.innerHTML = "Achievements: " + getAchieved() + "/" + achieveTotal + " (" + percentAchieved + "%)";
+							progressBarInner.style.width = percentAchieved + "%";
+						}			
+					}				
+			}						
+			xhttp.open("GET", "http://localhost:3000/achievements/" + appID, true);
+			xhttp.send();
+		}
+		
+		function getGameImage(appid) {
+			var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (xhttp.readyState == 4 && xhttp.status == 200) {
+						var jsonObj = JSON.parse(xhttp.responseText);						
+						for (var j = 0; j < jsonObj.response.games.length; j++) {							
+							if(jsonObj.response.games[j].appid == appid) {								
+								gameImage.innerHTML = "<img src=" + "http://media.steampowered.com/steamcommunity/public/images/apps/" + appid + "/" + jsonObj.response.games[j].img_logo_url + ".jpg>" + "<p>Current Game: " + jsonObj.response.games[j].name + "</p>";
+								break;
+							}
+							else {
+								gameImage.innerHTML = "<p>Not playing a Steam game</p>";
+							}
+						}
+					}
+				}
+			xhttp.open("GET", "http://localhost:3000/owned_games", true);
+			xhttp.send();			
+		}
+		
+		window.onload = setInterval(getAppID, 30000);		
+	</script>
+</html>
