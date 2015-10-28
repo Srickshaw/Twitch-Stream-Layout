@@ -5,8 +5,10 @@ Before using, you need to get a Steam API key <https://steamcommunity.com/login/
 
 To use 
 `
-  >npm install
-  >node server.js
+  npm install
+` 
+`
+  node server.js
 `
 
 It's set on a 30 second timer - so if nothing shows up despite being in a Steam game, wait and once it pings the external API again, it'll properly display information.
